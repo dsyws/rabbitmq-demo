@@ -1,8 +1,9 @@
-package com.xxx.demo.quickStartDirect;
+package com.xxx.demo.quickStart10BackQueue;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Envelope;
 import com.xxx.demo.Channels;
+import com.xxx.demo.MyConsumer;
 import com.xxx.demo.QueueingConsumer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,24 +18,16 @@ public class Consumer {
     public void doTest() throws IOException, InterruptedException {
         Channel channel = channels.getChannelList().get(1);
 
-        String exchangeName = "test_direct_exchange";
-        String routingKey = "test_direct";
-        String queueName = "test_direct_queue";
+        String exchangeName = "test_back_exchange";
+        String routingKey = "test_back";
+        String queueName = "test_back_queue";
         String exchangeType="direct";
 
         channel.exchangeDeclare(exchangeName,exchangeType,true,false,false,null);
         channel.queueDeclare(queueName, false, false, false, null);
         channel.queueBind(queueName,exchangeName,routingKey);
 
-        QueueingConsumer queueingConsumer = new QueueingConsumer(channel);
-        channel.basicConsume(queueName, true, queueingConsumer);
+        channel.basicConsume(queueName, true, new MyConsumer(channel));
 
-        while (true) {
-            QueueingConsumer.Delivery delivery = queueingConsumer.nextDelivery();
-            String msg = new String(delivery.getBody());
-
-            Envelope envelope = delivery.getEnvelope();
-            System.out.println(msg);
-        }
     }
 }

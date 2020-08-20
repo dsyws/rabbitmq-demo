@@ -1,8 +1,9 @@
-package com.xxx.demo.quickStartTopic;
+package com.xxx.demo.quickStart9Qos;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Envelope;
 import com.xxx.demo.Channels;
+import com.xxx.demo.MyConsumer;
 import com.xxx.demo.QueueingConsumer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,25 +20,17 @@ public class Consumer {
     public void doTest() throws IOException, InterruptedException {
         Channel channel = channels.getChannelList().get(1);
 
-        String exchangeName = "test_topic_exchange";
-        String queueName = "test_topic_queue";
-        String exchangeType = "topic";
-//        String routingKey = "user.#";
-        String routingKey = "user.*";
+        String exchangeName = "test_qos_exchange";
+        String routingKey = "test_qos";
+        String queueName = "test_qos_queue";
+        String exchangeType = "direct";
 
         channel.exchangeDeclare(exchangeName, exchangeType, true, false, false, null);
         channel.queueDeclare(queueName, false, false, false, null);
         channel.queueBind(queueName, exchangeName, routingKey);
+        channel.basicQos(0, 1, false);
+        //关闭自动签收机制
+        channel.basicConsume(queueName, false, new MyConsumer(channel));
 
-        QueueingConsumer queueingConsumer = new QueueingConsumer(channel);
-        channel.basicConsume(queueName, true, queueingConsumer);
-        int i = 0;
-        while (true) {
-            QueueingConsumer.Delivery delivery = queueingConsumer.nextDelivery();
-            String msg = new String(delivery.getBody());
-
-            Envelope envelope = delivery.getEnvelope();
-            System.out.println(msg +"..."+ i++);
-        }
     }
 }

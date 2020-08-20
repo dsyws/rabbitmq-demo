@@ -1,4 +1,4 @@
-package com.xxx.demo.quickStartFanout;
+package com.xxx.demo.quickStart2Direct;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Envelope;
@@ -17,10 +17,10 @@ public class Consumer {
     public void doTest() throws IOException, InterruptedException {
         Channel channel = channels.getChannelList().get(1);
 
-        String exchangeName = "test_fanout_exchange";
-        String routingKey = "test_fanout";
-        String queueName = "test_fanout_queue";
-        String exchangeType="fanout";
+        String exchangeName = "test_direct_exchange";
+        String routingKey = "test_direct";
+        String queueName = "test_direct_queue";
+        String exchangeType="direct";
 
         channel.exchangeDeclare(exchangeName,exchangeType,true,false,false,null);
         channel.queueDeclare(queueName, false, false, false, null);
@@ -29,27 +29,12 @@ public class Consumer {
         QueueingConsumer queueingConsumer = new QueueingConsumer(channel);
         channel.basicConsume(queueName, true, queueingConsumer);
 
-
-        String queueName2 = "test_fanout_queue2";
-
-        channel.exchangeDeclare(exchangeName,exchangeType,true,false,false,null);
-        channel.queueDeclare(queueName2, false, false, false, null);
-        channel.queueBind(queueName2,exchangeName,routingKey);
-
-        QueueingConsumer queueingConsumer2 = new QueueingConsumer(channel);
-        channel.basicConsume(queueName2, true, queueingConsumer2);
-
-
         while (true) {
             QueueingConsumer.Delivery delivery = queueingConsumer.nextDelivery();
             String msg = new String(delivery.getBody());
 
-            System.out.println(msg+"11111111111111");
-
-            QueueingConsumer.Delivery delivery2 = queueingConsumer.nextDelivery();
-            String msg2 = new String(delivery2.getBody());
-
-            System.out.println(msg2+"22222222222222");
+            Envelope envelope = delivery.getEnvelope();
+            System.out.println(msg);
         }
     }
 }

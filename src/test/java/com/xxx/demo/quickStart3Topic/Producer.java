@@ -1,4 +1,4 @@
-package com.xxx.demo.quickStartTopic;
+package com.xxx.demo.quickStart3Topic;
 
 import com.rabbitmq.client.Channel;
 import com.xxx.demo.Channels;
